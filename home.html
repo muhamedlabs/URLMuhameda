@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Muhameda | URLMuhameda</title>
+    <link href="static/assets/Web.png" rel="shortcut icon" type="image/icon">
+
+    <!-- SEO -->
+    <meta property="og:title" content="Website Muhameda">
+    <meta name="description" content="Andrey Muhamed main page profile blog history analytics portfolio">
+    <meta name="keywords" content="Andrey Muhamed, YouTube, Business, Creator, God, Samurai">
+    <meta name="robots" content="index,follow">
+    <meta property="og:description" content="Andrey Muhamed's main page provides access to his blog, history, analytics, and portfolio, offering a snapshot of his professional and creative journey.">
+    <meta property="og:image" content="https://muhamedlabs.pro/images/social/Web.png">
+    <meta property="og:url" content="https://muhamedlabs.pro">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://kit.fontawesome.com/87b9cd76ed.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <span class="particle"></span>
+        <span class="particle"></span>
+        <span class="particle"></span>
+        <span class="particle"></span>
+        <span class="particle"></span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fas fa-link"></i>
+                URLMuhameda
+            </a>
+            <ul class="nav-menu">
+                <li>
+                    <a href="https://muhamedlabs.pro/">
+                        <i class="fas fa-home"></i>
+                        <span>Главная страница</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-file-contract"></i>
+                        <span>Правила использования</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="title">
+                Сокращайте ссылки <span class="gradient-text">красиво</span>!
+            </h1>
+            <p class="subtitle">Превратите длинные URL в элегантные короткие ссылки одним кликом...</p>
+            
+            <div class="url-card">
+                <form id="urlForm">
+                    <div class="input-group">
+                        <input 
+                            type="url" 
+                            class="url-input" 
+                            id="url" 
+                            placeholder="https://example.com/very-long-url-that-needs-shortening" 
+                            required
+                        >
+                        <button type="submit" class="submit-btn" id="submitBtn">
+                            <i class="fas fa-magic"></i>
+                            Сократить
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Loading -->
+                <div id="loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Создаем магию...
+                </div>
+
+                <!-- Result -->
+                <div id="result" class="result">
+                    <div class="result-item">
+                        <div class="result-label">Оригинальная ссылка:</div>
+                        <div class="result-box" id="originalUrl"></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Короткая ссылка:</div>
+                        <div class="result-box" id="shortUrl" class="short-link"></div>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard()">
+                        <i class="fas fa-copy"></i>
+                        Копировать ссылку
+                    </button>
+                </div>
+
+                <!-- Error -->
+                <div id="error" class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; URLMuhameda 2025. Сделано с ❤️ для потрясающего проекта!</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+

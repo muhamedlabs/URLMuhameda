@@ -1,0 +1,9 @@
+quart==0.18.2
+
+werkzeug==2.3.8
+
+python-dotenv~=1.0.1
+
+ashredis==1.2.5
+
+validators==0.20.0
