@@ -3,8 +3,8 @@ import json
 import threading
 from flask import Blueprint, request, jsonify, redirect
 from utils.helpers import generate_short_code, is_valid_url
-from config.redis_manager import RedisManager
-from models.url import Url  
+from BANNED_FILES.config import RedisManager, DATA_FILE
+from redis_storage.url import Url  
 
 api_bp = Blueprint('api', __name__)
 
@@ -12,7 +12,6 @@ api_bp = Blueprint('api', __name__)
 # FILE STORAGE
 # ---------------------------
 
-DATA_FILE = 'url_storage.json'
 lock = threading.Lock()  # Для потокобезопасного доступа
 
 def load_all_urls():
