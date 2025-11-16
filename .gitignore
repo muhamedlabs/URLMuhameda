@@ -4,3 +4,5 @@
 
 
 .env
+BANNED_FILES/config.py
+BANNED_FILES/url_storage.json
