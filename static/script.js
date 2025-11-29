@@ -1,184 +1,254 @@
-document.addEventListener('DOMContentLoaded', initializeApp);
+// -----------------------------------------------
+//  Загрузка страницы
+// -----------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    initLoadingScreen();
+    initializeApp();
+});
 
+// Анимация загрузочного экрана
+function initLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    const progressBar = document.querySelector('.loading-progress-bar');
+
+    if (!loadingScreen) return;
+
+    setTimeout(() => {
+        loadingScreen.classList.add('fade-out');
+        setTimeout(() => loadingScreen.remove(), 800);
+    }, 2500);
+}
+
+// -----------------------------------------------
+//  Инициализация приложения
+// -----------------------------------------------
 function initializeApp() {
     setupEventListeners();
 }
 
 function setupEventListeners() {
     const urlForm = document.getElementById('urlForm');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const copyBtn = document.querySelector('.copy-btn');
+
     if (urlForm) urlForm.addEventListener('submit', handleFormSubmit);
 
-    const navLinks = document.querySelectorAll('.nav-links a');
-    navLinks.forEach(link => link.addEventListener('click', e => e.preventDefault()));
+    navLinks.forEach(link =>
+        link.addEventListener('click', e => e.preventDefault())
+    );
 
-    const copyBtn = document.querySelector('.copy-btn');
     if (copyBtn) copyBtn.addEventListener('click', copyToClipboard);
 }
 
+// -----------------------------------------------
+//  Отправка формы
+// -----------------------------------------------
 async function handleFormSubmit(e) {
     e.preventDefault();
+
     const urlInput = document.getElementById('url');
     const url = urlInput?.value.trim();
-    const elements = getFormElements();
+    const ui = getUI();
 
     if (!url) return showError('Пожалуйста, введите URL');
     if (!isValidUrl(url)) return showError('Пожалуйста, введите корректный URL');
 
-    showLoading(elements);
+    showLoading(ui);
 
     try {
         const data = await shortenUrl(url);
-        handleSuccessResponse(data, elements);
+        handleSuccessResponse(data, ui);
     } catch (err) {
-        handleErrorResponse(err, elements);
+        handleErrorResponse(err, ui);
     } finally {
-        hideLoading(elements);
+        hideLoading(ui);
     }
 }
 
-function getFormElements() {
+function getUI() {
     return {
         loading: document.getElementById('loading'),
         result: document.getElementById('result'),
         error: document.getElementById('error'),
-        submitBtn: document.getElementById('submitBtn'),
-        urlCard: document.querySelector('.url-card')
+        submitBtn: document.getElementById('submitBtn')
     };
 }
 
-function isValidUrl(string) {
+// -----------------------------------------------
+//  Проверка URL
+// -----------------------------------------------
+function isValidUrl(str) {
     try {
-        new URL(string.startsWith('http') ? string : `https://${string}`);
+        new URL(str.startsWith('http') ? str : `https://${str}`);
         return true;
-    } catch (_) {
-        const urlPattern = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/;
-        return urlPattern.test(string);
+    } catch {
+        const pattern =
+            /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/;
+        return pattern.test(str);
     }
 }
 
-function showLoading(elements) {
-    toggleElement(elements.result, false);
-    toggleElement(elements.error, false);
-    toggleElement(elements.loading, true);
-    elements.submitBtn.disabled = true;
-    elements.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
+// -----------------------------------------------
+//  UI: загрузка
+// -----------------------------------------------
+function showLoading(ui) {
+    toggle(ui.result, false);
+    toggle(ui.error, false);
+    toggle(ui.loading, true);
+
+    ui.submitBtn.disabled = true;
+    ui.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
 }
 
-function hideLoading(elements) {
-    toggleElement(elements.loading, false);
-    elements.submitBtn.disabled = false;
-    elements.submitBtn.innerHTML = '<i class="fas fa-magic"></i> Сократить';
+function hideLoading(ui) {
+    toggle(ui.loading, false);
+    ui.submitBtn.disabled = false;
+    ui.submitBtn.innerHTML = '<i class="fas fa-magic"></i> Сократить';
 }
 
-function getApiBaseUrl() {
-    return window.location.origin;
+function toggle(el, show) {
+    if (el) el.style.display = show ? 'block' : 'none';
 }
 
+// -----------------------------------------------
+//  API: сокращение ссылки
+// -----------------------------------------------
 async function shortenUrl(url) {
-    const apiUrl = `${getApiBaseUrl()}/api/shorten`;
-    const payload = { url };
+    const apiUrl = `${location.origin}/api/shorten`;
+
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+        try {
+            const json = JSON.parse(text);
+            throw new Error(json.error || `Ошибка ${response.status}`);
+        } catch {
+            throw new Error(
+                response.status === 500
+                    ? 'Ошибка сервера (500). Проверьте логи'
+                    : `HTTP ${response.status}`
+            );
+        }
+    }
 
     try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const text = await response.text();
-        if (!response.ok) {
-            try {
-                const json = JSON.parse(text);
-                throw new Error(json.error || `Ошибка сервера ${response.status}`);
-            } catch {
-                throw new Error(response.status === 500
-                    ? 'Ошибка на сервере (500). Проверьте логи сервера'
-                    : `HTTP ${response.status}`);
-            }
-        }
-
-        try {
-            return JSON.parse(text);
-        } catch {
-            throw new Error('Некорректный формат ответа сервера');
-        }
-    } catch (err) {
-        throw new Error(err.message || 'Ошибка соединения с сервером');
+        return JSON.parse(text);
+    } catch {
+        throw new Error('Некорректный ответ сервера');
     }
 }
 
-function handleSuccessResponse(data, elements) {
-    const originalUrlElement = document.getElementById('originalUrl');
-    const shortUrlElement = document.getElementById('shortUrl');
-    if (originalUrlElement && shortUrlElement) {
-        originalUrlElement.textContent = data.original_url;
-        shortUrlElement.textContent = data.short_url;
-        shortUrlElement.href = data.short_url;
+// -----------------------------------------------
+//  Успешный ответ
+// -----------------------------------------------
+function handleSuccessResponse(data, ui) {
+    const originalUrl = document.getElementById('originalUrl');
+    const shortUrl = document.getElementById('shortUrl');
+
+    if (originalUrl && shortUrl) {
+        const trimmed =
+            data.original_url.length > 35
+                ? data.original_url.slice(0, 35) + '...'
+                : data.original_url;
+
+        originalUrl.textContent = trimmed;
+        originalUrl.title = data.original_url;
+        originalUrl.href = data.original_url;
+
+        shortUrl.textContent = data.short_url;
+        shortUrl.href = data.short_url;
     }
-    toggleElement(elements.result, true);
+
+    toggle(ui.result, true);
     document.getElementById('url').value = '';
-    elements.result.scrollIntoView({ behavior: 'smooth' });
+    ui.result.scrollIntoView({ behavior: 'smooth' });
 }
 
-function handleErrorResponse(err, elements) {
+// -----------------------------------------------
+//  Ошибки
+// -----------------------------------------------
+function handleErrorResponse(err, ui) {
     console.error(err);
-    showError(err.message || 'Произошла ошибка сервера', elements);
+    showError(err.message);
 }
 
-function showError(message) {
-    const errorElement = document.getElementById('error');
-    const errorMessage = document.getElementById('errorMessage');
-    if (!errorElement || !errorMessage) return alert(message);
-    errorMessage.textContent = message;
-    toggleElement(errorElement, true);
-    errorElement.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => toggleElement(errorElement, false), 8000);
+function showError(msg) {
+    const block = document.getElementById('error');
+    const msgEl = document.getElementById('errorMessage');
+
+    if (!block || !msgEl) return alert(msg);
+
+    msgEl.textContent = msg;
+    toggle(block, true);
+
+    setTimeout(() => toggle(block, false), 8000);
 }
 
+// -----------------------------------------------
+//  Копирование ссылки
+// -----------------------------------------------
 async function copyToClipboard() {
     const shortUrl = document.getElementById('shortUrl')?.textContent;
-    const copyBtn = document.querySelector('.copy-btn');
+    const btn = document.querySelector('.copy-btn');
+
     if (!shortUrl) return showError('Нет ссылки для копирования');
 
     try {
         await navigator.clipboard.writeText(shortUrl);
-        showCopySuccess(copyBtn);
+        showCopySuccess(btn);
     } catch {
-        fallbackCopyTextToClipboard(shortUrl, copyBtn);
+        fallbackCopy(shortUrl, btn);
     }
 }
 
-function showCopySuccess(copyBtn) {
-    if (!copyBtn) return;
-    const original = copyBtn.innerHTML;
-    copyBtn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
-    copyBtn.classList.add('success');
+function showCopySuccess(btn) {
+    if (!btn) return;
+
+    const original = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fas fa-check"></i> Скопировано!';
+    btn.classList.add('success');
+    btn.disabled = true;
+
     setTimeout(() => {
-        copyBtn.innerHTML = original;
-        copyBtn.classList.remove('success');
-    }, 2000);
+        btn.innerHTML = original;
+        btn.classList.remove('success');
+        btn.disabled = false;
+    }, 5000);
 }
 
-function fallbackCopyTextToClipboard(text, copyBtn) {
+function fallbackCopy(text, btn) {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
+
     document.body.appendChild(textarea);
-    textarea.focus();
     textarea.select();
-    try { document.execCommand('copy'); showCopySuccess(copyBtn); }
-    catch { showError('Копирование не поддерживается браузером'); }
-    document.body.removeChild(textarea);
+
+    try {
+        document.execCommand('copy');
+        showCopySuccess(btn);
+    } catch {
+        showError('Копирование не поддерживается');
+    }
+
+    textarea.remove();
 }
 
-function toggleElement(element, show) {
-    if (element) element.style.display = show ? 'block' : 'none';
-}
-
+// -----------------------------------------------
+//  Глобальные ошибки
+// -----------------------------------------------
 window.addEventListener('error', e => console.error('Global error:', e.error));
+
 window.addEventListener('unhandledrejection', e => {
-    console.error('Unhandled promise rejection:', e.reason);
+    console.error('Promise rejection:', e.reason);
     e.preventDefault();
-    showError('Произошла неожиданная ошибка. Попробуйте обновить страницу.');
+    showError('Неожиданная ошибка. Обновите страницу.');
 });

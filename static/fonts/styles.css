@@ -1,20 +1,20 @@
 @font-face {
-    font-family: 'Gilroy';
-    src: url('FiraMono-Regular.ttf') format('truetype');
+    font-family: 'muhamedlabs';
+    src: url('GrosVentre-Light.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Gilroy';
-    src: url('FiraMono-Medium.ttf') format('truetype');
+    font-family: 'muhamedlabs';
+    src: url('GrosVentre-Regular.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Gilroy';
-    src: url('FiraMono-Bold.ttf') format('truetype');
+    font-family: 'muhamedlabs';
+    src: url('GrosVentre-Bold.ttf') format('truetype');
     font-weight: 600;
     font-style: normal;
 }

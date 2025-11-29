@@ -19,10 +19,36 @@
     <meta property="og:type" content="website">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="/static/styles.css">
     <script src="https://kit.fontawesome.com/87b9cd76ed.js" crossorigin="anonymous"></script>
 </head>
 <body>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-logo">
+            <i class="fas fa-link"></i>
+            <span class="loading-logo-text">URLMuhameda</span>
+        </div>
+        <div class="loading-spinner"></div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar"></div>
+        </div>
+        <div class="loading-text">Загрузка магии...</div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles-container">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
     <!-- Animated background -->
     <div class="bg-animation">
         <span class="particle"></span>
@@ -41,15 +67,23 @@
             </a>
             <ul class="nav-menu">
                 <li>
-                    <a href="https://muhamedlabs.pro/" target="_blank">
-                        <i class="fas fa-home"></i>
+                    <a href="https://muhamedlabs.pro/" target="_blank" class="nav-link epic-btn">
+                        <div class="nav-icon-wrapper">
+                            <i class="fas fa-home"></i>
+                            <div class="icon-pulse"></div>
+                        </div>
                         <span>Главная страница</span>
+                        <div class="nav-hover-effect"></div>
                     </a>
                 </li>
                 <li>
-                    <a href="https://muhamedlabs.pro/devion/home" target="_blank">
-                        <i class="fas fa-file-contract"></i>
+                    <a href="https://muhamedlabs.pro/devion/home" target="_blank" class="nav-link epic-btn">
+                        <div class="nav-icon-wrapper">
+                            <i class="fas fa-file-contract"></i>
+                            <div class="icon-pulse"></div>
+                        </div>
                         <span>Правила использования</span>
+                        <div class="nav-hover-effect"></div>
                     </a>
                 </li>
             </ul>
@@ -91,13 +125,13 @@
                 <div id="result" class="result">
                     <div class="result-item">
                         <div class="result-label">Оригинальная ссылка:</div>
-                        <div class="result-box" id="originalUrl"></div>
+                        <a id="originalUrl" class="result-box original-link" target="_blank"></a>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Короткая ссылка:</div>
-                        <div class="result-box" id="shortUrl" class="short-link"></div>
+                        <a id="shortUrl" class="result-box short-link" target="_blank"></a>
                     </div>
-                    <button class="copy-btn" onclick="copyToClipboard()">
+                    <button class="copy-btn">
                         <i class="fas fa-copy"></i>
                         Копировать ссылку
                     </button>
@@ -118,7 +152,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="/static/script.js"></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"25ecb06922674e058a7228e4f1b6db7a","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-
