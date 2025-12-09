@@ -7,3 +7,5 @@ python-dotenv~=1.0.1
 ashredis==1.2.5
 
 validators==0.20.0
+
+flask==3.0.3
