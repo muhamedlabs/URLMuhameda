@@ -1,22 +1,30 @@
 import asyncio
 import os
 import threading
-from flask import Flask
+from flask import Flask, send_from_directory
 from routes.api import api_bp
 from routes.views import views_bp
 from protocol.url_storage import initialize_system, load_file_to_redis
 from BANNED_FILES.config import redis_manager
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-app = Flask(__name__, template_folder=BASE_DIR)
+
+app = Flask(__name__, template_folder=BASE_DIR, static_folder=BASE_DIR)
 
 app.register_blueprint(api_bp)
 app.register_blueprint(views_bp)
 
 
-# ==========================
-# Периодическая синхронизация
-# ==========================
+@app.route("/")
+def home():
+    return send_from_directory(BASE_DIR, "home.html")
+
+
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory(BASE_DIR, filename)
+
+
 async def periodic_sync():
     """Каждые 30 минут загружает данные из файла в Redis"""
     while True:
@@ -30,9 +38,6 @@ async def periodic_sync():
         await asyncio.sleep(1800)  # 30 минут
 
 
-# ==========================
-# Инициализация Redis и файла
-# ==========================
 def init_sync():
     """Синхронная инициализация асинхронных компонентов"""
     try:
@@ -42,7 +47,7 @@ def init_sync():
         loop.run_until_complete(redis_manager.init_connection())
         print("[REDIS] Redis is ready")
 
-        if not hasattr(redis_manager, '_redis') or redis_manager._redis is None:
+        if not hasattr(redis_manager, "_redis") or redis_manager._redis is None:
             raise RuntimeError("Redis connection failed - _redis is None")
 
         loop.run_until_complete(load_file_to_redis())
@@ -56,10 +61,6 @@ def init_sync():
     finally:
         loop.close()
 
-
-# ==========================
-# Фоновый мониторинг + cron
-# ==========================
 def start_background_monitoring():
     """Запускаем мониторинг и периодическую синхронизацию в фоновом потоке"""
 
@@ -68,10 +69,8 @@ def start_background_monitoring():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
-            # Старт системного мониторинга
             loop.run_until_complete(initialize_system())
 
-            # Запуск периодического обновления
             loop.create_task(periodic_sync())
             print("[SYNC] Periodic file sync every 30 minutes started")
 
@@ -80,22 +79,15 @@ def start_background_monitoring():
         except Exception as e:
             print(f"Background monitoring error: {e}")
 
-    monitor_thread = threading.Thread(target=run_monitoring, daemon=True)
-    monitor_thread.start()
+    threading.Thread(target=run_monitoring, daemon=True).start()
     print("[MONITOR] Background monitoring started")
 
 
-# ==========================
-# Flask
-# ==========================
 def run_flask():
-    print("[FLASK] Starting Flask server...")
+    print("[FLASK] Starting Flask server on port 5001")
     app.run(host="0.0.0.0", port=5001, debug=True)
 
 
-# ==========================
-# entry point
-# ==========================
 if __name__ == "__main__":
     print("[APP] Starting application...")
 
